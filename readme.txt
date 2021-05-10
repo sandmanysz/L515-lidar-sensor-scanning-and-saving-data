@@ -1,4 +1,7 @@
-Requirement environment:
+Hardware requirement:
+L515 RGB-depth sensor, driver computer. (Laptop or other embedding devices)
+
+Software Requirement environment:
 Python3, Opencv, numpy, pyrealsense2.
 
 
