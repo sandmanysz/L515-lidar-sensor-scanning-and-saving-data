@@ -3,20 +3,23 @@ import numpy as np
 import cv2
 import time
 
+
+
+
 def get_image_data(RGB_resolution,depth_resolution,Path):
     # RGB_resolution_dictionary={'1920_1080': [1920,1080], '1280_720':[1280_720], '640_480':[640,480], '640_360':[640,360]}
-    # depth_resolution_dictionary = {'1024_768': [1024,768], '1024_480': [1024,480],'640_480':[640,480]}
+    # depth_resolution_dictionary = {'1024_768': [1024,768], '640_480':[640,480]}
     RGB_resolution_dictionary={'0': [1920,1080], '1':[1280,720], '2':[640,480], '3':[640,360]}
     depth_resolution_dictionary = {'0': [1024,768], '1': [640,480]}
     pc = rs.pointcloud()
-    # points = rs.points()
+
     # Configure depth and color streams
     pipeline = rs.pipeline()
     config = rs.config()
     config.enable_stream(rs.stream.depth, depth_resolution_dictionary[str(depth_resolution)][0], depth_resolution_dictionary[str(depth_resolution)][1], rs.format.z16, 30)
     config.enable_stream(rs.stream.color, RGB_resolution_dictionary[str(RGB_resolution)][0], RGB_resolution_dictionary[str(RGB_resolution)][1], rs.format.bgr8, 30)
-    # preset_range = depth_sensor.get_option_range(rs.option.visual_preset)
-    # Start streaming
+
+    # Start streaming and set the working preset parameter
     cfg = pipeline.start(config)
     dev = cfg.get_device()
     depth_sensor = dev.first_depth_sensor()
@@ -25,11 +28,10 @@ def get_image_data(RGB_resolution,depth_resolution,Path):
         align_to = rs.stream.color
         align = rs.align(align_to)
 
-        # image collection and we start collect it from 11th frame to avoid distortion.
+        # image collection and we start to collect it from 11th frame to avoid distortion.
         for i in range(10):
             data = pipeline.wait_for_frames()
-            # depth = data.get_depth_frame() # original depth data
-            # color = data.get_color_frame() # original color data
+
         aligned_frames = align.process(data)
         depth=aligned_frames.get_depth_frame()
         color=aligned_frames.get_color_frame()
@@ -37,7 +39,7 @@ def get_image_data(RGB_resolution,depth_resolution,Path):
 
 
 
-        # get extrin and intrinsic parameter
+        # get camera extrin and intrinsic parameter
         dprofile = depth.get_profile()
         cprofile = color.get_profile()
 
@@ -57,7 +59,7 @@ def get_image_data(RGB_resolution,depth_resolution,Path):
 
 
         colorful = np.asanyarray(color.get_data())
-        colorful=colorful.reshape(-1,3)
+
 
         # get the vertex coordinate
         points = pc.calculate(depth)
@@ -71,7 +73,7 @@ def get_image_data(RGB_resolution,depth_resolution,Path):
         cv2.imshow('depth',depth_colormap)
 
         key=cv2.waitKey(1)
-        # key 'q' to stop the images showing and save the image and point cloud.
+        # key 'q' to stop the images showing and save the image and point cloud by currently time.
         if key & 0xFF == ord('q') or key == 27:
             cv2.destroyAllWindows()
             now=int(round(time.time()*1000))
@@ -102,6 +104,6 @@ if __name__ == '__main__':
     # depth_resolution_dictionary = {'0': [1024,768], '1':[640,480]}
     RGB_resolution=0
     depth_resolution=0
-    path='C:/Users/siyua/PycharmProjects/fiber_mold_datacollection/dataset/' # data_saving_address
+    path='C:/Users/siyua/PycharmProjects/fiber_mold_datacollection/dataset/' # Data saving address
     get_image_data(RGB_resolution=RGB_resolution,depth_resolution=depth_resolution,Path=path)
     # Key 'q' to stop the monitoring and save whole data.
